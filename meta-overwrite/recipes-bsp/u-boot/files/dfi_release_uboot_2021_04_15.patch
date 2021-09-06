@@ -1,0 +1,173 @@
+diff --git a/arch/arm/dts/imx8mp-trcnw400.dts b/arch/arm/dts/imx8mp-trcnw400.dts
+index c7e4306..163af8b 100644
+--- a/arch/arm/dts/imx8mp-trcnw400.dts
++++ b/arch/arm/dts/imx8mp-trcnw400.dts
+@@ -9,7 +9,7 @@
+ #include "imx8mp.dtsi"
+ 
+ / {
+-	model = "NXP i.MX8MPlus LPDDR4 EVK board";
++	model = "NXP i.MX8MPlus LPDDR4 TRCNW400";
+ 	compatible = "fsl,imx8mp-evk", "fsl,imx8mp";
+ 
+ 	chosen {
+@@ -52,6 +52,18 @@
+ 		status = "okay";
+ 	};
+ 
++	leds {
++		compatible = "gpio-leds";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_gpio_led>;
++
++		led0: power {
++			label = "power";
++			gpios = <&gpio3 16 GPIO_ACTIVE_HIGH>;
++			default-state = "on";
++			linux,default-trigger = "gpio";
++		};
++	};
+ };
+ 
+ &eqos {
+@@ -68,7 +80,7 @@
+ 
+ 		ethphy0: ethernet-phy@1 {
+ 			compatible = "ethernet-phy-ieee802.3-c22";
+-			reg = <1>;
++			reg = <7>;
+ 			eee-broken-1000t;
+ 		};
+ 	};
+@@ -88,7 +100,7 @@
+ 
+ 		ethphy1: ethernet-phy@1 {
+ 			compatible = "ethernet-phy-ieee802.3-c22";
+-			reg = <1>;
++			reg = <5>;
+ 			eee-broken-1000t;
+ 		};
+ 	};
+@@ -327,6 +339,12 @@
+ 		>;
+ 	};
+ 
++	pinctrl_gpio_led: gpioledgrp {
++		fsl,pins = <
++			MX8MP_IOMUXC_NAND_READY_B__GPIO3_IO16	0x19
++		>;
++	};
++
+ 	pinctrl_fec: fecgrp {
+ 		fsl,pins = <
+ 			MX8MP_IOMUXC_SAI1_RXD2__ENET1_MDC		0x3
+diff --git a/board/freescale/imx8mp_trcnw400/imx8mp_trcnw400.c b/board/freescale/imx8mp_trcnw400/imx8mp_trcnw400.c
+index 1569c39..979f64c 100644
+--- a/board/freescale/imx8mp_trcnw400/imx8mp_trcnw400.c
++++ b/board/freescale/imx8mp_trcnw400/imx8mp_trcnw400.c
+@@ -469,8 +469,11 @@ int board_typec_get_mode(int index)
+ #define DISPMIX				13
+ #define MIPI				15
+ 
++#define GPIO_TO_PIN(GPIO_GROUP, GPIO_PIN) ((GPIO_GROUP - 1) * 32 + GPIO_PIN)
+ int board_init(void)
+ {
++	char gpio_name[15];
++
+ #ifdef CONFIG_USB_TCPC
+ 	setup_typec();
+ #endif
+@@ -496,6 +499,9 @@ int board_init(void)
+ 	call_imx_sip(FSL_SIP_GPC, FSL_SIP_CONFIG_GPC_PM_DOMAIN, DISPMIX, true, 0);
+ 	call_imx_sip(FSL_SIP_GPC, FSL_SIP_CONFIG_GPC_PM_DOMAIN, MIPI, true, 0);
+ 
++	/* use gpio cmd */
++	sprintf(gpio_name, "gpio set %d\n", GPIO_TO_PIN(3, 16));
++	run_command(gpio_name, 0);
+ 	return 0;
+ }
+ 
+@@ -505,7 +511,7 @@ int board_late_init(void)
+ 	board_late_mmc_env_init();
+ #endif
+ #ifdef CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
+-	env_set("board_name", "EVK");
++	env_set("board_name", "TRCNW400");
+ 	env_set("board_rev", "iMX8MP");
+ #endif
+ 
+diff --git a/cmd/mmc.c b/cmd/mmc.c
+index ddb4c5e..fd631c1 100644
+--- a/cmd/mmc.c
++++ b/cmd/mmc.c
+@@ -848,7 +848,7 @@ static int do_mmc_setdsr(cmd_tbl_t *cmdtp, int flag,
+ 	return ret;
+ }
+ 
+-static int do_mmc_read_dfi_info(cmd_tbl_t *cmdtp, int flag,
++int do_mmc_read_dfi_info(cmd_tbl_t *cmdtp, int flag,
+ 			   int argc, char * const argv[])
+ {
+ 	#define MAC_ADDR_LEN 6
+@@ -936,6 +936,7 @@ static int do_mmc_read_dfi_info(cmd_tbl_t *cmdtp, int flag,
+ 	env_set("ethaddr", "");
+ 	env_set("ethaddr_eqos", "");
+ 	eth_env_set_enetaddr("ethaddr", eth_mac_addr1);
++	eth_env_set_enetaddr("eth1addr", eth_mac_addr2);
+ 	eth_env_set_enetaddr("ethaddr_eqos", eth_mac_addr2);
+ 
+ 	/* switch to org partconf */
+diff --git a/common/board_r.c b/common/board_r.c
+index 8b8d490..860920c 100644
+--- a/common/board_r.c
++++ b/common/board_r.c
+@@ -599,6 +599,14 @@ static int initr_bbmii(void)
+ #ifdef CONFIG_CMD_NET
+ static int initr_net(void)
+ {
++	int ret;
++	int argc = 2;
++	char *argv[2] = {"dfi-info", "2"};
++
++	ret = do_mmc_read_dfi_info(NULL, 0, argc, argv);
++	if (ret)
++		puts("do_mmc_read_dfi_info fail\n");
++
+ 	puts("Net:   ");
+ 	eth_initialize();
+ #if defined(CONFIG_RESET_PHY_R)
+diff --git a/dfi_release_2021_0126 b/dfi_release_2021_0126
+deleted file mode 100644
+index e69de29..0000000
+diff --git a/dfi_release_2021_0413 b/dfi_release_2021_0413
+new file mode 100644
+index 0000000..e69de29
+diff --git a/include/configs/imx8mp_trcnw400.h b/include/configs/imx8mp_trcnw400.h
+index 318e0a5..7fa2e16 100644
+--- a/include/configs/imx8mp_trcnw400.h
++++ b/include/configs/imx8mp_trcnw400.h
+@@ -62,10 +62,10 @@
+ #define CONFIG_ETHPRIME                 "eth1" /* Set eqos to primary since we use its MDIO */
+ 
+ #define CONFIG_FEC_XCV_TYPE             RGMII
+-#define CONFIG_FEC_MXC_PHYADDR          1
++#define CONFIG_FEC_MXC_PHYADDR          5
+ #define FEC_QUIRK_ENET_MAC
+ 
+-#define DWC_NET_PHYADDR			1
++#define DWC_NET_PHYADDR			7
+ #ifdef CONFIG_DWC_ETH_QOS
+ #define CONFIG_SYS_NONCACHED_MEMORY     (1 * SZ_1M)     /* 1M */
+ #endif
+diff --git a/include/mmc.h b/include/mmc.h
+index ccddfa3..8a62e91 100644
+--- a/include/mmc.h
++++ b/include/mmc.h
+@@ -944,4 +944,7 @@ struct emmc_bootpart2_data {
+ 	char mac_addr2[15];
+ 	char reserved[919];
+ };
++
++int do_mmc_read_dfi_info(cmd_tbl_t *cmdtp, int flag,
++			   int argc, char * const argv[]);
+ #endif /* _MMC_H_ */
