@@ -1,0 +1,36 @@
+From 7737b75d175206e61a46e8e19ab2a3792eb18842 Mon Sep 17 00:00:00 2001
+From: Slash <slash.linux.c@gmail.com>
+Date: Sat, 14 Aug 2021 15:38:32 +0800
+Subject: [PATCH] auto find platform dtb avoid build fail
+
+---
+ iMX8M/soc.mak | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/iMX8M/soc.mak b/iMX8M/soc.mak
+index b7b3986..d9cdf3e 100644
+--- a/iMX8M/soc.mak
++++ b/iMX8M/soc.mak
+@@ -1,6 +1,7 @@
+ MKIMG = mkimage_imx8
+ OUTIMG = flash.bin
+ 
++TARGET_DTB := $(shell find ./ -name "*.dtb")
+ CC ?= gcc
+ CFLAGS ?= -O2 -Wall -std=c99 -static
+ INCLUDE = ./lib
+@@ -133,9 +134,9 @@ u-boot-atf-tee.bin: u-boot.bin bl31.bin tee.bin
+ clean:
+ 	@rm -f $(MKIMG) u-boot-atf.bin u-boot-atf-tee.bin u-boot-spl-ddr.bin u-boot.itb u-boot.its u-boot-ddr3l.itb u-boot-ddr3l.its u-boot-spl-ddr3l.bin u-boot-ddr4.itb u-boot-ddr4.its u-boot-spl-ddr4.bin u-boot-ddr4-evk.itb u-boot-ivt.itb u-boot-ddr4-evk.its $(OUTIMG)
+ 
+-dtbs = evk.dtb
++dtbs = $(TARGET_DTB)
+ $(dtbs):
+-	./$(DTB_PREPROC) $(PLAT)-evk.dtb $(dtbs)
++	./$(DTB_PREPROC) $(PLAT)-$(TARGET_DTB) $(dtbs)
+ 
+ u-boot.itb: $(dtbs)
+ 	./$(PAD_IMAGE) tee.bin
+-- 
+2.17.1
+
