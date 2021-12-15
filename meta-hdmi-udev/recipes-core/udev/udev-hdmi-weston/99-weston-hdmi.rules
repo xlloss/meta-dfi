@@ -1,0 +1,3 @@
+#!/bin/bash
+
+SUBSYSTEM=="drm", ACTION=="change", ENV{HOTPLUG}=="1", RUN+="/etc/udev/scripts/weston_restart.sh"
