@@ -14,6 +14,7 @@ SRC_URI += "file://profile \
             file://icon-cube.png \
             file://icon-demo.png \
             file://icon-touchscreen.png \
+            file://penguin.png \
             "
 
 SRC_URI_append_mx8dx = "${@bb.utils.contains('DISTRO_FEATURES', 'wayland', ' file://weston.config', '', d)}"
@@ -39,6 +40,7 @@ do_install_append() {
     install -Dm 0644 ${WORKDIR}/icon-cube.png  ${D}${datadir}/weston/icon-cube.png
     install -Dm 0644 ${WORKDIR}/icon-demo.png  ${D}${datadir}/weston/icon-demo.png
     install -Dm 0644 ${WORKDIR}/icon-touchscreen.png  ${D}${datadir}/weston/icon-touchscreen.png
+    install -Dm 0644 ${WORKDIR}/penguin.png  ${D}${datadir}/weston/penguin.png
 
 }
 
@@ -47,5 +49,5 @@ FILES_${PN} += "${datadir}/*"
 RDEPENDS_${PN} += "bash"
 RPROVIDES_${PN} += "save-touch-cali.sh do_touch_cali.sh qtanimation.sh qtclock.sh qtcube.sh qtdemo.sh"
 RDEPENDS_${PN} += "save-touch-cali.sh do_touch_cali.sh qtanimation.sh qtclock.sh qtcube.sh qtdemo.sh"
-RPROVIDES_${PN} += "icon-3d.png icon-animation.png icon-clock.png icon-cube.png icon-demo.png icon-touchscreen.png"
-RDEPENDS_${PN} += "icon-3d.png icon-animation.png icon-clock.png icon-cube.png icon-demo.png icon-touchscreen.png"
+RPROVIDES_${PN} += "icon-3d.png icon-animation.png icon-clock.png icon-cube.png icon-demo.png icon-touchscreen.png penguin.png"
+RDEPENDS_${PN} += "icon-3d.png icon-animation.png icon-clock.png icon-cube.png icon-demo.png icon-touchscreen.png penguin.png"
