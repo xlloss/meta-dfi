@@ -42,8 +42,7 @@ do_install_append() {
 
 }
 
-#FILES_${PN} += "${datadir}/*"
-FILES_${PN}-dev = "${datadir}/*"
+FILES_${PN} += "${datadir}/*"
 
 RDEPENDS_${PN} += "bash"
 RPROVIDES_${PN} += "save-touch-cali.sh do_touch_cali.sh qtanimation.sh qtclock.sh qtcube.sh qtdemo.sh"
