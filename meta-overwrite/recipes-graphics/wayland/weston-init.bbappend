@@ -8,12 +8,14 @@ SRC_URI += "file://profile \
             file://qtcube.sh \
             file://qtdemo.sh \
             file://qtopengl.sh \
+            file://browser.sh \
             file://icon-3d.png \
             file://icon-animation.png \
             file://icon-clock.png \
             file://icon-cube.png \
             file://icon-demo.png \
             file://icon-touchscreen.png \
+            file://icon-browser.png \
             file://penguin.png \
             "
 
@@ -34,6 +36,7 @@ do_install_append() {
     install -Dm 0755 ${WORKDIR}/qtcube.sh  ${D}${bindir}/qtcube.sh
     install -Dm 0755 ${WORKDIR}/qtdemo.sh  ${D}${bindir}/qtdemo.sh
     install -Dm 0755 ${WORKDIR}/qtopengl.sh  ${D}${bindir}/qtopengl.sh
+    install -Dm 0755 ${WORKDIR}/browser.sh  ${D}${bindir}/browser.sh
     install -Dm 0644 ${WORKDIR}/icon-3d.png  ${D}${datadir}/weston/icon-3d.png
     install -Dm 0644 ${WORKDIR}/icon-animation.png  ${D}${datadir}/weston/icon-animation.png
     install -Dm 0644 ${WORKDIR}/icon-clock.png  ${D}${datadir}/weston/icon-clock.png
@@ -41,6 +44,7 @@ do_install_append() {
     install -Dm 0644 ${WORKDIR}/icon-demo.png  ${D}${datadir}/weston/icon-demo.png
     install -Dm 0644 ${WORKDIR}/icon-touchscreen.png  ${D}${datadir}/weston/icon-touchscreen.png
     install -Dm 0644 ${WORKDIR}/penguin.png  ${D}${datadir}/weston/penguin.png
+    install -Dm 0644 ${WORKDIR}/icon-browser.png  ${D}${datadir}/weston/icon-browser.png
 
 }
 
@@ -51,3 +55,5 @@ RPROVIDES_${PN} += "save-touch-cali.sh do_touch_cali.sh qtanimation.sh qtclock.s
 RDEPENDS_${PN} += "save-touch-cali.sh do_touch_cali.sh qtanimation.sh qtclock.sh qtcube.sh qtdemo.sh"
 RPROVIDES_${PN} += "icon-3d.png icon-animation.png icon-clock.png icon-cube.png icon-demo.png icon-touchscreen.png penguin.png"
 RDEPENDS_${PN} += "icon-3d.png icon-animation.png icon-clock.png icon-cube.png icon-demo.png icon-touchscreen.png penguin.png"
+RPROVIDES_${PN} += "icon-browser.png browser.sh"
+RDEPENDS_${PN} += "icon-browser.png browser.sh"
