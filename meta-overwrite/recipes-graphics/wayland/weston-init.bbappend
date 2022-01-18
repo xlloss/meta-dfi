@@ -10,6 +10,7 @@ SRC_URI += "file://profile \
             file://qtopengl.sh \
             file://browser.sh \
             file://qtwifi.sh \
+            file://qtterminal.sh \
             file://icon-3d.png \
             file://icon-animation.png \
             file://icon-clock.png \
@@ -21,6 +22,7 @@ SRC_URI += "file://profile \
             file://icon-reboot.png \
             file://penguin.png \
             file://icon-wifi.png \
+            file://icon-qtterminal.png \
             "
 
 SRC_URI_append_mx8dx = "${@bb.utils.contains('DISTRO_FEATURES', 'wayland', ' file://weston.config', '', d)}"
@@ -42,6 +44,8 @@ do_install_append() {
     install -Dm 0755 ${WORKDIR}/qtopengl.sh  ${D}${bindir}/qtopengl.sh
     install -Dm 0755 ${WORKDIR}/browser.sh  ${D}${bindir}/browser.sh
     install -Dm 0755 ${WORKDIR}/qtwifi.sh  ${D}${bindir}/qtwifi.sh
+    install -Dm 0755 ${WORKDIR}/qtterminal.sh  ${D}${bindir}/qtterminal.sh
+
     install -Dm 0644 ${WORKDIR}/icon-3d.png  ${D}${datadir}/weston/icon-3d.png
     install -Dm 0644 ${WORKDIR}/icon-animation.png  ${D}${datadir}/weston/icon-animation.png
     install -Dm 0644 ${WORKDIR}/icon-clock.png  ${D}${datadir}/weston/icon-clock.png
@@ -53,15 +57,16 @@ do_install_append() {
     install -Dm 0644 ${WORKDIR}/icon-poweroff.png  ${D}${datadir}/weston/icon-poweroff.png
     install -Dm 0644 ${WORKDIR}/icon-reboot.png  ${D}${datadir}/weston/icon-reboot.png
     install -Dm 0644 ${WORKDIR}/icon-wifi.png  ${D}${datadir}/weston/icon-wifi.png
+    install -Dm 0644 ${WORKDIR}/icon-qtterminal.png  ${D}${datadir}/weston/icon-qtterminal.png
 
 }
 
 FILES_${PN} += "${datadir}/*"
 
 RDEPENDS_${PN} += "bash"
-RPROVIDES_${PN} += "save-touch-cali.sh do_touch_cali.sh qtanimation.sh qtclock.sh qtcube.sh qtdemo.sh qtwifi.sh"
-RDEPENDS_${PN} += "save-touch-cali.sh do_touch_cali.sh qtanimation.sh qtclock.sh qtcube.sh qtdemo.sh qtwifi.sh"
+RPROVIDES_${PN} += "save-touch-cali.sh do_touch_cali.sh qtanimation.sh qtclock.sh qtcube.sh qtdemo.sh qtwifi.sh qtterminal.sh"
+RDEPENDS_${PN} += "save-touch-cali.sh do_touch_cali.sh qtanimation.sh qtclock.sh qtcube.sh qtdemo.sh qtwifi.sh qtterminal.sh"
 RPROVIDES_${PN} += "icon-3d.png icon-animation.png icon-clock.png icon-cube.png icon-demo.png icon-touchscreen.png penguin.png"
 RDEPENDS_${PN} += "icon-3d.png icon-animation.png icon-clock.png icon-cube.png icon-demo.png icon-touchscreen.png penguin.png"
-RPROVIDES_${PN} += "icon-browser.png browser.sh icon-poweroff.png icon-reboot.png icon-wifi.png"
-RDEPENDS_${PN} += "icon-browser.png browser.sh icon-poweroff.png icon-reboot.png icon-wifi.png"
+RPROVIDES_${PN} += "icon-browser.png browser.sh icon-poweroff.png icon-reboot.png icon-wifi.png icon-qtterminal.png"
+RDEPENDS_${PN} += "icon-browser.png browser.sh icon-poweroff.png icon-reboot.png icon-wifi.png icon-qtterminal.png"
