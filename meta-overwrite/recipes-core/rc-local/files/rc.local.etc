@@ -26,7 +26,6 @@ else
     echo 30000 >  /proc/sys/vm/min_free_kbytes
 fi
 
-/usr/bin/rs485_initial_port -p /dev/ttymxc3 -b 115200
 
 exit 0
 
