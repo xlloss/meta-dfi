@@ -1,0 +1,12 @@
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-m8mp553.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-m8mp553.dtsi
+index ed1ca42..d98db70 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-m8mp553.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mp-m8mp553.dtsi
+@@ -1399,7 +1399,6 @@
+ &resmem {
+ 	linux,cma {
+ 		compatible = "shared-dma-pool";
+-		/delete-property/ alloc-ranges;
+ 		size = <0 0x28000000>;
+ 	};
+ };
