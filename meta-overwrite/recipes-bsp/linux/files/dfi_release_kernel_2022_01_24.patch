@@ -1,0 +1,25 @@
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-m8mp553.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-m8mp553.dtsi
+index fe9fb51..ed1ca42 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-m8mp553.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mp-m8mp553.dtsi
+@@ -442,7 +442,7 @@
+ 		#address-cells = <1>;
+ 		#size-cells = <0>;
+ 
+-		ethphy0: ethernet-phy@1 {
++		ethphy0: ethernet-phy@0 {
+ 			compatible = "ethernet-phy-ieee802.3-c22";
+ 			reg = <7>;
+ 			eee-broken-1000t;
+@@ -1395,3 +1395,11 @@
+ &hdmiphy {
+ 	status = "okay";
+ };
++
++&resmem {
++	linux,cma {
++		compatible = "shared-dma-pool";
++		/delete-property/ alloc-ranges;
++		size = <0 0x28000000>;
++	};
++};
