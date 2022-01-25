@@ -6,7 +6,7 @@ SRC_URI += "file://dfi_release_kernel_2021_09_06.patch \
 			file://dfi_release_kernel_2021_11_24.patch \
 			file://dfi_release_kernel_2021_11_25.patch \
 			file://dfi_release_kernel_2021_12_15.patch \
-			file://dfi_release_kernel_2022_01_24.patch \
+			file://dfi_release_kernel_2022_01_24-0.patch \
 			file://dfi_release_kernel_2022_01_24-1.patch \
 "
 
