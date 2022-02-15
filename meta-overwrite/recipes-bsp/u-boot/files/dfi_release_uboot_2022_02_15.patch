@@ -1,0 +1,287 @@
+diff --git a/arch/arm/include/asm/arch-imx8m/ddr.h b/arch/arm/include/asm/arch-imx8m/ddr.h
+index e81a637..0ea9df2 100644
+--- a/arch/arm/include/asm/arch-imx8m/ddr.h
++++ b/arch/arm/include/asm/arch-imx8m/ddr.h
+@@ -682,14 +682,10 @@ enum fw_type {
+ };
+ 
+ enum {
+-	DDR_1G_ID_0 = 0,
+-	DDR_1G_ID_1,
+-	DDR_2G_ID_0,
+-	DDR_2G_ID_1,
+-	DDR_3G_ID_0,
+-	DDR_3G_ID_1,
+-	DDR_4G_ID_0,
+-	DDR_4G_ID_1,
++	DDR_1G = 0,
++	DDR_2G,
++	DDR_3G,
++	DDR_4G,
+ };
+ 
+ struct dram_cfg_param {
+diff --git a/arch/arm/mach-imx/imx8m/soc.c b/arch/arm/mach-imx/imx8m/soc.c
+index 0953756..8e712a3 100644
+--- a/arch/arm/mach-imx/imx8m/soc.c
++++ b/arch/arm/mach-imx/imx8m/soc.c
+@@ -202,34 +202,29 @@ void enable_caches(void)
+ __weak int board_phys_sdram_size(phys_size_t *size)
+ {
+ 	u32 id;
+-	#define GPIO3_IO7 7
+ 	#define GPIO3_IO8 8
+ 	#define GPIO3_IO9 9
+-	#define DDR_TYPE_ID0 (1 << GPIO3_IO7)
+ 	#define DDR_TYPE_ID1 (1 << GPIO3_IO8)
+ 	#define DDR_TYPE_ID2 (1 << GPIO3_IO9)
+ 
+ 	if (!size)
+ 		return -EINVAL;
+ 
+-	id = readl(GPIO3_BASE_ADDR) & (DDR_TYPE_ID2 | DDR_TYPE_ID1 | DDR_TYPE_ID0);
+-	id = id >> GPIO3_IO7;
++	id = readl(GPIO3_BASE_ADDR) & (DDR_TYPE_ID2 | DDR_TYPE_ID1);
++	id = id >> GPIO3_IO8;
+ 
+ 	switch (id) {
+-	case DDR_1G_ID_0:
+-	case DDR_1G_ID_1:
++	case DDR_1G:
+ 		printf("%s DDR 1G ", __func__);
+ 		*size = 0x40000000;
+ 		break;
+ 
+-	case DDR_2G_ID_0:
+-	case DDR_2G_ID_1:
++	case DDR_2G:
+ 		printf("%s DDR 2G ", __func__);
+ 		*size = 0x80000000;
+ 		break;
+ 
+-	case DDR_4G_ID_0:
+-	case DDR_4G_ID_1:
++	case DDR_4G:
+ 		printf("%s DDR 4G ", __func__);
+ 		*size = 0x100000000;
+ 		break;
+diff --git a/board/freescale/imx8mp_m8mp553/spl.c b/board/freescale/imx8mp_m8mp553/spl.c
+index 918845f..5ffdfbf 100644
+--- a/board/freescale/imx8mp_m8mp553/spl.c
++++ b/board/freescale/imx8mp_m8mp553/spl.c
+@@ -76,7 +76,6 @@ struct i2c_pads_info i2c_pad_info1 = {
+ #define USDHC_GPIO_PAD_CTRL (PAD_CTL_HYS | PAD_CTL_DSE1)
+ #define USDHC_CD_PAD_CTRL (PAD_CTL_PE |PAD_CTL_PUE |PAD_CTL_HYS | PAD_CTL_DSE4)
+ 
+-#define BOARD_ID0 IMX_GPIO_NR(3, 7)
+ #define BOARD_ID1 IMX_GPIO_NR(3, 8)
+ #define BOARD_ID2 IMX_GPIO_NR(3, 9)
+ 
+@@ -104,17 +103,16 @@ static iomux_v3_cfg_t const usdhc2_pads[] = {
+ 	MX8MP_PAD_SD2_CD_B__GPIO2_IO12    | MUX_PAD_CTRL(USDHC_CD_PAD_CTRL),
+ };
+ 
+-#define BOARD_ID_N 3
++#define BOARD_ID_N 2
+ 
+ static struct fsl_esdhc_cfg usdhc_cfg[2] = {
+ 	{USDHC2_BASE_ADDR, 0, 4},
+ 	{USDHC3_BASE_ADDR, 0, 8},
+ };
+ 
+-unsigned board_id_pin[BOARD_ID_N] = {BOARD_ID0, BOARD_ID1, BOARD_ID2};
++unsigned board_id_pin[BOARD_ID_N] = {BOARD_ID1, BOARD_ID2};
+ 
+-const char board_id_pin_name[BOARD_ID_N][10] = {"board_id0",
+-		"board_id1", "board_id2"};
++const char board_id_pin_name[BOARD_ID_N][10] = {"board_id1", "board_id2"};
+ 
+ void spl_dram_init(void)
+ {
+@@ -129,19 +127,16 @@ void spl_dram_init(void)
+ 	}
+ 
+ 	switch (id) {
+-	case DDR_1G_ID_0:
+-	case DDR_1G_ID_1:
++	case DDR_1G:
+ 		printf("%s DDR 1G ", __func__);
+ 		break;
+ 
+-	case DDR_2G_ID_0:
+-	case DDR_2G_ID_1:
++	case DDR_2G:
+ 		printf("%s DDR 2G ", __func__);
+ 		ddr_init(&DRAM_TIMING(2g_id0));
+ 		break;
+ 
+-	case DDR_4G_ID_0:
+-	case DDR_4G_ID_1:
++	case DDR_4G:
+ 		printf("%s DDR 4G 4g_id1", __func__);
+ 		ddr_init(&DRAM_TIMING(4g_id1));
+ 		break;
+diff --git a/cmd/Kconfig b/cmd/Kconfig
+index 300d800..128cbac 100644
+--- a/cmd/Kconfig
++++ b/cmd/Kconfig
+@@ -1742,6 +1742,12 @@ config CMD_QFW
+ 	  feature is to allow easy loading of files passed to qemu-system
+ 	  via -kernel / -initrd
+ 
++config IMX8MP_SOC_ID
++	bool "imx8mp soc type id"
++	depends on TARGET_IMX8MP_M8MP553
++	help
++	  use gpio to distinguish soc type (thermal temperature)
++
+ source "cmd/mvebu/Kconfig"
+ 
+ config CMD_TERMINAL
+diff --git a/cmd/Makefile b/cmd/Makefile
+index 7c62e3b..76ff3f9 100644
+--- a/cmd/Makefile
++++ b/cmd/Makefile
+@@ -168,6 +168,7 @@ obj-$(CONFIG_CMD_DFU) += dfu.o
+ obj-$(CONFIG_CMD_GPT) += gpt.o
+ obj-$(CONFIG_CMD_ETHSW) += ethsw.o
+ obj-$(CONFIG_CMD_AXI) += axi.o
++obj-$(CONFIG_CMD_THERMAL_ID) += soc_type.o
+ 
+ # Power
+ obj-$(CONFIG_CMD_PMIC) += pmic.o
+diff --git a/cmd/soc_type.c b/cmd/soc_type.c
+new file mode 100644
+index 0000000..5b5c5db
+--- /dev/null
++++ b/cmd/soc_type.c
+@@ -0,0 +1,95 @@
++/*
++ * SOC Temperature Type
++ * slash.linux.c@gmail.com
++ * Licensed under the GPL-2 or later.
++ */
++
++#include <common.h>
++#include <command.h>
++#include <errno.h>
++#include <dm.h>
++#include <malloc.h>
++#include <asm/gpio.h>
++#include <linux/err.h>
++
++__weak int name_to_gpio(const char *name)
++{
++	return simple_strtoul(name, NULL, 10);
++}
++
++enum gpio_cmd {
++	GPIOC_INPUT,
++};
++
++static int do_soc_type(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
++{
++	unsigned int gpio;
++	enum gpio_cmd sub_cmd;
++	int value;
++	const char *str_gpio = NULL;
++	int ret;
++	char env_buf[2];
++
++	if (argc < 2)
++ show_usage:
++		return CMD_RET_USAGE;
++
++	argv += 1;
++	str_gpio = *argv;
++
++	if (!str_gpio)
++		goto show_usage;
++
++	sub_cmd = GPIOC_INPUT;
++
++#if defined(CONFIG_DM_GPIO)
++	ret = gpio_lookup_name(str_gpio, NULL, NULL, &gpio);
++	if (ret) {
++		printf("GPIO: '%s' not found\n", str_gpio);
++		return cmd_process_error(cmdtp, ret);
++	}
++#else
++	/* turn the gpio name into a gpio number */
++	gpio = name_to_gpio(str_gpio);
++	if (gpio < 0)
++		goto show_usage;
++#endif
++
++	/* grab the pin before we tweak it */
++	ret = gpio_request(gpio, "cmd_soctype");
++	if (ret && ret != -EBUSY) {
++		printf("gpio: requesting pin %u failed\n", gpio);
++		return -1;
++	}
++
++	gpio_direction_input(gpio);
++	value = gpio_get_value(gpio);
++	printf("soc type: pin %s (gpio %u) value is ", str_gpio, gpio);
++
++	if (IS_ERR_VALUE(value)) {
++		printf("unknown (ret=%d)\n", value);
++		goto err;
++	}
++
++	sprintf(env_buf, "%d", value);
++	env_set("soc_type", env_buf);
++
++	if (value)
++		printf("%d: soc type Industry\n", value);
++	else
++		printf("%d: soc type Consump\n", value);
++
++	if (ret != -EBUSY)
++		gpio_free(gpio);
++
++	return (sub_cmd == GPIOC_INPUT) ? value : CMD_RET_SUCCESS;
++
++err:
++	if (ret != -EBUSY)
++		gpio_free(gpio);
++	return CMD_RET_FAILURE;
++}
++
++U_BOOT_CMD(soc_type, 2, 0, do_soc_type,
++	   "query soc type",
++	   "<pin>\n");
+diff --git a/configs/imx8mp_m8mp553_defconfig b/configs/imx8mp_m8mp553_defconfig
+index acc7236..8a770b0 100644
+--- a/configs/imx8mp_m8mp553_defconfig
++++ b/configs/imx8mp_m8mp553_defconfig
+@@ -55,6 +55,7 @@ CONFIG_CMD_DHCP=y
+ CONFIG_CMD_MII=y
+ CONFIG_CMD_PING=y
+ CONFIG_CMD_CACHE=y
++CONFIG_IMX8MP_SOC_ID=y
+ CONFIG_CMD_REGULATOR=y
+ CONFIG_CMD_EXT2=y
+ CONFIG_CMD_EXT4=y
+diff --git a/include/configs/imx8mp_m8mp553.h b/include/configs/imx8mp_m8mp553.h
+index 099d29a..ea5d6e6 100644
+--- a/include/configs/imx8mp_m8mp553.h
++++ b/include/configs/imx8mp_m8mp553.h
+@@ -101,6 +101,8 @@
+ 	"fdt_addr=0x43000000\0"			\
+ 	"fdt_high=0xffffffffffffffff\0"		\
+ 	"boot_fit=no\0" \
++	"soc_type_id_pin=71\0" \
++	"check_soc_type=if test ${soc_type} = 0; then setenv fdt_file imx8mp-m8mp553c.dtb; else setenv fdt_file imx8mp-m8mp553i.dtb; fi\0" \
+ 	"fdt_file=" CONFIG_DEFAULT_FDT_FILE "\0" \
+ 	"initrd_addr=0x43800000\0"		\
+ 	"initrd_high=0xffffffffffffffff\0" \
+@@ -115,7 +117,7 @@
+ 	"loadimage=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${image}\0" \
+ 	"loadfdt=fatload mmc ${mmcdev}:${mmcpart} ${fdt_addr} ${fdt_file}\0" \
+ 	"mmcboot=echo Booting from mmc ...; " \
+-		"mmc dfi-info 2; run mmcargs; " \
++		"soc_type ${soc_type_id_pin}; run check_soc_type; mmc dfi-info 2; run mmcargs; " \
+ 		"if test ${boot_fit} = yes || test ${boot_fit} = try; then " \
+ 			"bootm ${loadaddr}; " \
+ 		"else " \
