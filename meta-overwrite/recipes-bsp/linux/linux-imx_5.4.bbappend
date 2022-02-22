@@ -9,6 +9,7 @@ SRC_URI += "file://dfi_release_kernel_2021_09_06.patch \
 			file://dfi_release_kernel_2022_01_24-0.patch \
 			file://dfi_release_kernel_2022_01_24-1.patch \
 			file://dfi_release_kernel_2022_02_15.patch \
+			file://dfi_release_kernel_2022_02_22.patch \
 "
 
 #addtask copy_defconfig after do_patch before do_preconfigure

@@ -1,0 +1,33 @@
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-m8mp553.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-m8mp553.dtsi
+index d98db70..65f0588 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-m8mp553.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mp-m8mp553.dtsi
+@@ -382,6 +382,20 @@
+ 		ports = <&lcdif3_disp>, <&lcdif2_disp>;
+ 	};
+ 
++	sound-hdmi {
++		compatible = "fsl,imx-audio-cdnhdmi";
++		model = "audio-hdmi";
++		audio-cpu = <&aud2htx>;
++		hdmi-out;
++		constraint-rate = <44100>,
++				<88200>,
++				<176400>,
++				<32000>,
++				<48000>,
++				<96000>,
++				<192000>;
++		status = "okay";
++	};
+ };
+ 
+ &clk {
+@@ -1402,3 +1416,7 @@
+ 		size = <0 0x28000000>;
+ 	};
+ };
++
++&aud2htx {
++	status = "okay";
++};
